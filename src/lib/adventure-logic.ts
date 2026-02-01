@@ -14,22 +14,22 @@ export function performCheck(character: Character, skill: Skill, dc: number): { 
     // Calculate modifier
     // Mapping Skill -> Attribute
     let statName: keyof typeof character.stats = 'Dexterity'; // Default
-    
+
     // Strength
     if (['Athletics', 'Strength'].includes(skill as string)) statName = 'Strength';
-    
+
     // Intelligence
     if (['Arcana', 'History', 'Nature', 'Religion', 'Investigation', 'Intelligence'].includes(skill as string)) statName = 'Intelligence';
-    
+
     // Wisdom
     if (['Insight', 'Medicine', 'Perception', 'Survival', 'Animal Handling', 'Wisdom'].includes(skill as string)) statName = 'Wisdom';
-    
+
     // Charisma
     if (['Deception', 'Intimidation', 'Performance', 'Persuasion', 'Charisma'].includes(skill as string)) statName = 'Charisma';
-    
+
     // Constitution
     if (['Constitution'].includes(skill as string)) statName = 'Constitution';
-    
+
     // Dexterity (Default but explicit check for others)
     if (['Acrobatics', 'Sleight of Hand', 'Stealth', 'Dexterity'].includes(skill as string)) statName = 'Dexterity';
 
@@ -40,7 +40,7 @@ export function performCheck(character: Character, skill: Skill, dc: number): { 
     // Proficiency Check
     const isProficient = character.skills.includes(skill);
     const proficiencyBonus = 2 + Math.floor((character.level - 1) / 4); // Standard 5e progression
-    
+
     const bonus = isProficient ? proficiencyBonus : 0;
 
     const roll = rollDie(20);
@@ -328,21 +328,11 @@ export function generateNextScene(previousSceneId: string | null, playerLevel: n
                 });
             }
 
-            choices.push({
-                id: 'leave',
-                text: 'Continue on your way.',
-                consequence: { success: `You push forward without delay.`, failure: '' }
-            });
+
         }
 
         // Ensure there's always a 'leave' option if not added above
-        if (!choices.find(c => c.id === 'leave') && !choices.find(c => c.id === 'riddle')) {
-            choices.push({
-                id: 'leave',
-                text: 'Continue on your way.',
-                consequence: { success: `You push forward without delay.`, failure: '' }
-            });
-        }
+
 
         return {
             id,
