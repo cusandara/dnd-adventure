@@ -11,9 +11,10 @@ import { applyStartingEquipment } from '@/lib/dnd-rules/starting-equipment';
 
 export interface CharacterWizardProps {
     onReset: () => void;
+    onComplete: (character: Character) => void;
 }
 
-export function CharacterWizard({ onReset }: CharacterWizardProps) {
+export function CharacterWizard({ onReset, onComplete }: CharacterWizardProps) {
     const [step, setStep] = useState(0);
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [character, setCharacter] = useState<Character | null>(null);
@@ -23,6 +24,12 @@ export function CharacterWizard({ onReset }: CharacterWizardProps) {
     const [selectedClass, setSelectedClass] = useState('Fighter');
 
     const currentQuestion = QUESTIONNAIRE[step];
+
+    const handleFinish = () => {
+        if (character) {
+            onComplete(character);
+        }
+    };
 
     const handleSetupComplete = () => {
         if (name.trim()) setSetupCompleted(true);
@@ -95,8 +102,25 @@ export function CharacterWizard({ onReset }: CharacterWizardProps) {
             inventory: [], // Initialized empty, populated by applyStartingEquipment
             wallet: { cp: 0, sp: 0, ep: 0, gp: 0, pp: 0 },
             equipment: { mainHand: null, offHand: null, armor: null },
-            quests: []
+            quests: [],
+            resources: {},
+            deathSaves: { successes: 0, failures: 0 },
+            knownSpells: [],
+            feats: []
         };
+
+        // Initialize Resources
+        if (finalClass.name === 'Fighter') {
+            newCharacter.resources['Second Wind'] = { current: 1, max: 1 };
+        }
+        if (finalClass.name === 'Wizard') {
+            newCharacter.resources['Spell Slots'] = { current: 2, max: 2 }; // Level 1 Standard
+            newCharacter.knownSpells = ['fire_bolt', 'ray_of_frost', 'magic_missile', 'burning_hands', 'mage_armor'];
+        }
+        if (finalClass.name === 'Cleric') {
+            newCharacter.resources['Spell Slots'] = { current: 2, max: 2 };
+            newCharacter.knownSpells = ['sacred_flame', 'spare_the_dying', 'cure_wounds', 'healing_word', 'guiding_bolt'];
+        }
 
         // Apply Starting Equipment
         newCharacter = applyStartingEquipment(newCharacter);
@@ -104,7 +128,27 @@ export function CharacterWizard({ onReset }: CharacterWizardProps) {
         setCharacter(newCharacter);
     };
 
-    if (character) return <AdventureView character={character} onReset={onReset} />;
+    if (character) {
+        return (
+            <div className="flex flex-col gap-6 max-w-4xl mx-auto">
+                <CharacterSheet character={character} />
+                <div className="flex justify-center gap-4">
+                    <button
+                        onClick={() => setCharacter(null)}
+                        className="px-8 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-slate-300 font-bold transition-all"
+                    >
+                        Back
+                    </button>
+                    <button
+                        onClick={handleFinish}
+                        className="px-8 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold rounded-lg shadow-lg hover:shadow-amber-500/20 transition-all transform hover:scale-105"
+                    >
+                        Start Adventure
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     if (!setupCompleted) {
         return (

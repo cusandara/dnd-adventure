@@ -41,19 +41,38 @@ export function performShortRest(character: Character): RestResult {
     const newCurrentHp = Math.min(character.hp.max, character.hp.current + healing);
     const actualHealed = newCurrentHp - character.hp.current;
 
+    // --- RESOURCE RECOVERY (SHORT REST) ---
+    // Make sure resources object exists (for old saves stability)
+    const resources = { ...character.resources };
+
+    // Fighter: Recover Second Wind
+    if (character.class.name === 'Fighter' && resources['Second Wind']) {
+        resources['Second Wind'] = { ...resources['Second Wind'], current: resources['Second Wind'].max };
+    }
+
+    // Wizard: Arcane Recovery (Recover 1 spell slot level for now - MVP)
+    if (character.class.name === 'Wizard' && resources['Spell Slots']) {
+        const current = resources['Spell Slots'].current;
+        const max = resources['Spell Slots'].max;
+        if (current < max) {
+            resources['Spell Slots'] = { ...resources['Spell Slots'], current: Math.min(max, current + 1) };
+        }
+    }
+
     const newChar = {
         ...character,
         hp: {
             ...character.hp,
             current: newCurrentHp,
             hitDiceCurrent: character.hp.hitDiceCurrent - 1
-        }
+        },
+        resources
     };
 
     return {
         character: newChar,
         healedCaused: actualHealed,
-        message: `You spent a Hit Die (d${hitDieSize}). Rolled ${roll} + ${conMod} (Con) = Healed ${healing} HP.`,
+        message: `You spent a Hit Die (d${hitDieSize}). Rolled ${roll} + ${conMod} (Con) = Healed ${healing} HP. Resources recovered.`,
         hitDiceSpent: 1
     };
 }
@@ -72,18 +91,27 @@ export function performLongRest(character: Character): RestResult {
         character.hp.hitDiceCurrent + hitDiceRegained
     );
 
+    // --- RESOURCE RECOVERY (LONG REST) ---
+    const resources = { ...character.resources };
+
+    // Recover Everything to Max
+    Object.keys(resources).forEach(key => {
+        resources[key] = { ...resources[key], current: resources[key].max };
+    });
+
     const newChar = {
         ...character,
         hp: {
             ...character.hp,
             current: character.hp.max,
             hitDiceCurrent: newHitDiceCurrent
-        }
+        },
+        resources
     };
 
     return {
         character: newChar,
         healedCaused: healedAmount,
-        message: `Long Rest complete. You regained ${healedAmount} HP and ${hitDiceRegained} Hit Dice.`
+        message: `Long Rest complete. You regained ${healedAmount} HP and ${hitDiceRegained} Hit Dice. All abilities recovered.`
     };
 }

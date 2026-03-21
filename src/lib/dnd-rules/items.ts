@@ -187,6 +187,100 @@ export const ITEMS: Record<string, Item> = {
         description: 'Restores 2d4+2 Hit Points.',
         rarity: 'common',
         value: 5000 // 50gp
+    },
+    // --- More Weapons (PHB) ---
+    'rapier': {
+        id: 'rapier',
+        name: 'Rapier',
+        type: 'weapon',
+        description: 'A slender, sharp-pointed sword.',
+        rarity: 'common',
+        value: 2500, // 25gp
+        weaponStats: { damage: '1d8', damageType: 'piercing', properties: ['finesse'] }
+    },
+    'battleaxe': {
+        id: 'battleaxe',
+        name: 'Battleaxe',
+        type: 'weapon',
+        description: 'A heavy axe with a broad edge.',
+        rarity: 'common',
+        value: 1000, // 10gp
+        weaponStats: { damage: '1d8', damageType: 'slashing', properties: ['versatile'] }
+    },
+    'greataxe': {
+        id: 'greataxe',
+        name: 'Greataxe',
+        type: 'weapon',
+        description: 'A massive double-bladed axe.',
+        rarity: 'common',
+        value: 3000, // 30gp
+        weaponStats: { damage: '1d12', damageType: 'slashing', properties: ['heavy', 'two-handed'] }
+    },
+
+    // --- More Armor (PHB) ---
+    'plate_armor': {
+        id: 'plate_armor',
+        name: 'Plate Armor',
+        type: 'armor',
+        description: 'Fitted metal plates covering the entire body.',
+        rarity: 'rare', // Expensive common
+        value: 150000, // 1500gp
+        armorStats: { baseAC: 18, type: 'heavy', stealthDisadvantage: true, maxDexBonus: 0 }
+    },
+    'splint_armor': {
+        id: 'splint_armor',
+        name: 'Splint Armor',
+        type: 'armor',
+        description: 'Vertical strips of metal riveted to leather.',
+        rarity: 'uncommon', // Mid-range
+        value: 20000, // 200gp
+        armorStats: { baseAC: 17, type: 'heavy', stealthDisadvantage: true, maxDexBonus: 0 }
+    },
+
+    // --- Magic Items (DMG) ---
+    'potion_greater_healing': {
+        id: 'potion_greater_healing',
+        name: 'Potion of Greater Healing',
+        type: 'potion',
+        description: 'Restores 4d4+4 Hit Points.',
+        rarity: 'uncommon',
+        value: 15000 // 150gp (Approx DMG price)
+    },
+    'longsword_plus1': {
+        id: 'longsword_plus1',
+        name: 'Longsword +1',
+        type: 'weapon',
+        description: 'A finely crafted magical blade.',
+        rarity: 'uncommon',
+        value: 50000, // 500gp? DMG prices vary. Let's say 500gp.
+        weaponStats: { damage: '1d8', damageType: 'slashing', properties: ['versatile'], magicBonus: 1 }
+    },
+    'dagger_plus1': {
+        id: 'dagger_plus1',
+        name: 'Dagger +1',
+        type: 'weapon',
+        description: 'A magical dagger that hums with power.',
+        rarity: 'uncommon',
+        value: 40000, // 400gp
+        weaponStats: { damage: '1d4', damageType: 'piercing', properties: ['finesse', 'light', 'range'], range: '20/60', magicBonus: 1 }
+    },
+    'shield_plus1': {
+        id: 'shield_plus1',
+        name: 'Shield +1',
+        type: 'armor',
+        description: 'A glowing shield that repels attacks.',
+        rarity: 'rare',
+        value: 100000, // 1000gp
+        armorStats: { baseAC: 2, type: 'shield', stealthDisadvantage: false, magicBonus: 1 }
+    },
+    'chain_mail_plus1': {
+        id: 'chain_mail_plus1',
+        name: 'Chain Mail +1',
+        type: 'armor',
+        description: 'Enchanted chain mail that is lighter than it looks.',
+        rarity: 'rare',
+        value: 200000, // 2000gp
+        armorStats: { baseAC: 16, type: 'heavy', stealthDisadvantage: true, maxDexBonus: 0, magicBonus: 1 }
     }
 };
 

@@ -13,7 +13,7 @@ export function CharacterSheet({ character }: CharacterSheetProps) {
             <div className="flex justify-between items-end border-b border-slate-700 pb-4 mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-amber-500">{character.name}</h1>
-                    <p className="text-slate-400 text-lg">{character.race.name} {character.class.name} (Level {character.level})</p>
+                    <p className="text-xl font-bold text-slate-200 mt-1">Level {character.level} {character.race.name} {character.subclass ? character.subclass.name : character.class.name}</p>
                 </div>
                 <div className="flex gap-4">
                     <div className="text-center">
@@ -121,12 +121,68 @@ export function CharacterSheet({ character }: CharacterSheetProps) {
                         </h3>
                         <div className="space-y-2">
                             {character.class.features.map((feature, i) => (
-                                <div key={i} className="text-sm">
+                                <div key={`cf-${i}`} className="text-sm">
                                     <span className="font-bold text-slate-200">{feature.name}:</span> <span className="text-slate-400">{feature.description}</span>
+                                </div>
+                            ))}
+                            {character.subclass?.features.map((feature, i) => (
+                                <div key={`scf-${i}`} className="text-sm">
+                                    <span className="font-bold text-indigo-300">[{character.subclass?.name}] {feature.name}:</span> <span className="text-slate-400">{feature.description}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
+
+                    {character.feats && character.feats.length > 0 && (
+                        <div>
+                            <h3 className="text-amber-500 font-bold uppercase tracking-wider border-b border-amber-900/30 pb-1 mb-3 flex items-center gap-2">
+                                <Zap className="w-4 h-4" /> Feats
+                            </h3>
+                            <div className="space-y-2">
+                                {character.feats.map((feat, i) => (
+                                    <div key={`feat-${i}`} className="text-sm">
+                                        <span className="font-bold text-indigo-300">{feat.name}:</span> <span className="text-slate-400">{feat.description}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {character.campaignState && (
+                        <div>
+                            <h3 className="text-amber-500 font-bold uppercase tracking-wider border-b border-amber-900/30 pb-1 mb-3 flex items-center gap-2">
+                                <span className="text-amber-500">📜</span> Campaign Progress
+                            </h3>
+                            <div className="space-y-2 text-sm bg-slate-900 border border-slate-700 rounded-lg p-3">
+                                <div className="flex justify-between items-center text-slate-300">
+                                    <span className="font-bold">Current Chapter</span>
+                                    <span className="text-amber-400 font-black px-2 py-0.5 bg-amber-900/40 rounded">
+                                        {character.campaignState.chapter}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center text-slate-300">
+                                    <span className="font-bold">Bosses Defeated</span>
+                                    <span>{character.campaignState.defeatedBosses.length}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-slate-300">
+                                    <span className="font-bold">Side Quests</span>
+                                    <span>{character.campaignState.sideQuestsCompleted}</span>
+                                </div>
+                                {Object.keys(character.campaignState.flags).length > 0 && (
+                                    <div className="pt-2 mt-2 border-t border-slate-700/50">
+                                        <div className="font-bold text-slate-400 mb-1">Story Decisions:</div>
+                                        <div className="flex flex-wrap gap-1">
+                                            {Object.keys(character.campaignState.flags).map(flag => (
+                                                <span key={flag} className="text-[10px] bg-slate-800 text-slate-300 px-2 py-1 rounded inline-block">
+                                                    {flag.replace(/_/g, ' ')}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     <div>
                         <h3 className="text-amber-500 font-bold uppercase tracking-wider border-b border-amber-900/30 pb-1 mb-3 flex items-center gap-2">

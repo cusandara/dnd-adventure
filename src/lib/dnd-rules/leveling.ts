@@ -29,20 +29,22 @@ export function checkLevelUp(character: Character): { leveledUp: boolean; newCha
     // Process Level Up
     const newStats = { ...character.stats };
 
-    // Auto-increase Primary Stat every 4 levels (ASI simulator)
-    // Simplified: Just +1 to Con and Primary Stat every level for arcade feeling? 
-    // Or stick to rules: Level 4, 8. 
-    // The user said "based on PHB". So Level 4 ASI.
-    if (nextLevel % 4 === 0) {
-        // Find highest stat
-        const primaryStat = Object.entries(newStats).reduce((a, b) => a[1] > b[1] ? a : b)[0] as keyof CharacterStats;
-        newStats[primaryStat] += 2; // +2 to primary
-    }
-
     // HP Increase: Roll Hit Dice (avg) + Con Mod
     const conMod = Math.floor((newStats.Constitution - 10) / 2);
     const hpGain = Math.max(1, (character.class.hitDice / 2) + 1 + conMod);
     const newMaxHp = character.hp.max + hpGain;
+
+    let pendingChoice = character.pendingChoice;
+
+    // Level 3: Subclass selection (if not already chosen)
+    if (nextLevel === 3 && !character.subclass) {
+        pendingChoice = 'subclass';
+    }
+
+    // Level 4, 8: Feat or ASI choice
+    if (nextLevel === 4 || nextLevel === 8) {
+        pendingChoice = 'feat_or_asi';
+    }
 
     return {
         leveledUp: true,
@@ -57,7 +59,8 @@ export function checkLevelUp(character: Character): { leveledUp: boolean; newCha
                 current: newMaxHp, // Heal on level up
                 hitDiceMax: nextLevel,
                 hitDiceCurrent: nextLevel
-            }
+            },
+            pendingChoice
         }
     };
 }
@@ -72,13 +75,13 @@ export function scaleEnemy(enemy: EnemyBase, playerLevel: number): EnemyBase {
     if (playerLevel === 1) return enemy;
 
     // Gentler Scaling for a fun experience:
-    // HP: +15% per level (was 30%)
+    // HP: +10% per level (was 15%)
     // AC: +1 every 4 levels (was 3)
     const scalingFactor = playerLevel - 1;
 
     return {
         name: enemy.name,
-        hp: Math.floor(enemy.hp * (1 + 0.15 * scalingFactor)), // +15% HP per level
+        hp: Math.floor(enemy.hp * (1 + 0.10 * scalingFactor)), // +10% HP per level
         ac: Math.min(18, enemy.ac + Math.floor(scalingFactor / 4)), // AC caps at 18, roughly +1 per 4 lvls
     };
 }

@@ -1,3 +1,5 @@
+import { Condition } from '@/lib/dnd-rules/conditions';
+
 export type Ability = 'Strength' | 'Dexterity' | 'Constitution' | 'Intelligence' | 'Wisdom' | 'Charisma';
 
 export type Skill =
@@ -6,7 +8,11 @@ export type Skill =
   | 'Nature' | 'Perception' | 'Performance' | 'Persuasion' | 'Religion'
   | 'Sleight of Hand' | 'Stealth' | 'Survival'
   | 'Constitution' // Added for raw checks
-  | 'Intelligence'; // Added for raw checks
+  | 'Intelligence'
+  | 'Strength'
+  | 'Dexterity'
+  | 'Wisdom'
+  | 'Charisma';
 
 export interface CharacterStats {
   Strength: number;
@@ -35,11 +41,29 @@ export interface Race {
   traits: Trait[];
 }
 
+export interface Subclass {
+  id: string;
+  name: string;
+  className: string;
+  description: string;
+  features: Feature[];
+}
+
+export interface Feat {
+  id: string;
+  name: string;
+  description: string;
+  effect: string; // Machine-readable effect key
+}
+
 export interface Class {
   name: string;
-  hitDice: number; // e.g., 6, 8, 10, 12
+  hitDice: number;
   savingThrows: Ability[];
   features: Feature[];
+  canCastSpells: boolean;
+  spellcastingAbility?: Ability;
+  subclasses?: Subclass[];
 }
 
 export type ItemType = 'weapon' | 'armor' | 'potion' | 'misc' | 'currency';
@@ -50,6 +74,7 @@ export interface WeaponProperties {
   damageType: 'slashing' | 'piercing' | 'bludgeoning';
   properties: ('light' | 'finesse' | 'heavy' | 'two-handed' | 'versatile' | 'range')[];
   range?: string; // "20/60"
+  magicBonus?: number; // e.g., +1, +2
 }
 
 export interface ArmorProperties {
@@ -57,6 +82,7 @@ export interface ArmorProperties {
   type: 'light' | 'medium' | 'heavy' | 'shield';
   stealthDisadvantage: boolean;
   maxDexBonus?: number; // 2 for medium, 0 for heavy, Infinity for light
+  magicBonus?: number; // e.g., +1, +2
 }
 
 export interface Item {
@@ -84,6 +110,17 @@ export interface EquipmentSlots {
   armor: Item | null;
 }
 
+export interface CampaignState {
+  chapter: number;          // 1–5
+  sceneIndex: number;       // Current scene within chapter
+  flags: Record<string, boolean>; // Story decisions
+  defeatedBosses: string[];
+  npcsRecruited: string[];
+  sideQuestsCompleted: number;
+  fillersSinceLastStory: number; // Pacing tracker
+  mode: 'campaign' | 'sandbox';
+}
+
 export interface Character {
   name: string;
   race: Race;
@@ -103,6 +140,13 @@ export interface Character {
   wallet: Wallet;
   equipment: EquipmentSlots;
   quests: Quest[];
+  resources: Record<string, { current: number; max: number }>;
+  deathSaves: { successes: number; failures: number };
+  knownSpells: string[];
+  subclass?: Subclass;
+  feats: Feat[];
+  pendingChoice?: 'subclass' | 'feat_or_asi';
+  campaignState?: CampaignState;
 }
 
 export interface Question {
@@ -127,6 +171,7 @@ export interface Choice {
     failure: string;
     damage?: number;
     reward?: string;
+    cost?: number; // Added for shop
   };
 }
 
@@ -138,6 +183,13 @@ export interface Combatant {
   maxHp: number;
   ac: number;
   initiative: number;
+  spellMod?: number;
+  spellSaveDC?: number;
+  deathSaves?: { successes: number; failures: number };
+  xpReward?: number;
+  attackBonus?: number;
+  damageDice?: string; // e.g. "1d6"
+  conditions?: Condition[];
 }
 
 export interface CombatState {
@@ -158,8 +210,28 @@ export interface Scene {
     hp: number;
     ac: number;
     attackLoading?: string;
-    initiativeBonus?: number; // Added
+    initiativeBonus?: number;
+    xpReward?: number;
+    attackBonus?: number;
+    damageDice?: string;
   };
+  enemies?: {
+    name: string;
+    hp: number;
+    ac: number;
+    initiativeBonus?: number;
+    xpReward?: number;
+    attackBonus?: number;
+    damageDice?: string;
+  }[];
+  // Campaign fields
+  isStoryScene?: boolean;
+  isBoss?: boolean;
+  campaignSceneId?: string;
+  nextSceneId?: string;
+  npcDialogue?: { name: string; text: string }[];
+  chapterTitle?: string;
+  setFlags?: Record<string, boolean>;
 }
 
 export interface QuestObjective {
@@ -180,6 +252,23 @@ export interface Quest {
     items?: Item[];
   };
   status: 'active' | 'completed' | 'failed';
+  chapterId?: number;
+}
+
+export interface Spell {
+  id: string;
+  name: string;
+  level: number; // 0 = Cantrip
+  school: string;
+  castingTime: string;
+  range: string;
+  components: string[]; // ["V", "S", "M"]
+  duration: string;
+  description: string;
+  damage?: string; // "1d10"
+  damageType?: string;
+  healing?: string; // "1d8"
+  scaling?: { level: number; damage: string }[]; // For cantrips scaling
 }
 
 
